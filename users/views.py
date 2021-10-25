@@ -18,7 +18,7 @@ class SignupView(View):
             if not re.search('[a-zA-Z0-9.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9.]+', data['email']) :
                 return JsonResponse({'message' : 'INVALID_EMAIL'}, status = 400)
 
-            if not re.fullmatch('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', data['password']):
+            if not re.fullmatch('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$', data['password']):
                 return JsonResponse({'message' : 'INVALID_PASSWORD'}, status = 400)
 
             if User.objects.filter(email = data['email']).exists():
@@ -41,8 +41,8 @@ class LoginView(View):
         try:
             data = json.loads(request.body)
 
-            if User.objects.filter(email=data['email']).exists():
-                user = User.objects.get(email=data['email'])
+            if User.objects.filter(username=data['username']).exists():
+                user = User.objects.get(username=data['username'])
                 if bcrypt.checkpw(data['password'].encode('utf-8'), user.password.encode('utf-8')):
                     access_token = jwt.encode({'id': user.id}, SECRET_KEY, algorithm = ALGORITHM)
                     return JsonResponse(
