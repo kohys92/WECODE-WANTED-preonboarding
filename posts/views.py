@@ -54,17 +54,17 @@ class PostView(View):
             return JsonResponse({'message' : 'KEY_ERROR'}, status = 400)
 
     @user_auth
-    def patch(self, request, post_id):
+    def put(self, request, post_id):
         try:
             data = json.loads(request.body)
 
             if not Post.objects.filter(id = post_id).exists():
                 return JsonResponse({'message' : 'DOES NOT EXIST'}, status = 404)
 
-            if Post.objects.get(id = post_id).user == request.user:
+            if not Post.objects.get(id = post_id).user == request.user:
                 return JsonResponse({'message' : 'UNAUTHORIZED USER'}, status = 400)
 
-            post = Post.objects.filter(id = post_id, user = request.user)
+            post = Post.objects.get(id = post_id)
             post.content = data['content']
 
             return JsonResponse({'message' : 'UPDATED SUCCESSFULLY'}, status = 200)
