@@ -37,15 +37,15 @@ class PostView(View):
         try:
             if not Post.objects.filter(id = post_id).exists():
                 return JsonResponse({'message' : 'DOES NOT EXIST'}, status = 404)
-            print(post_id)
+
             post = Post.objects.get(id = post_id)
-            print(post)
+
             data = {
                 "title": post.title,
                 "author": post.author,
                 "content": post.content,
-                "created_at": post.created_at,
-                "updated_at": post.updated_at
+                "created_at": post.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                "updated_at": post.updated_at.strftime('%Y-%m-%d %H:%M:%S')
             }
 
             return JsonResponse({'data' : data}, status = 200)
@@ -61,15 +61,11 @@ class PostView(View):
             if not Post.objects.filter(id = post_id).exists():
                 return JsonResponse({'message' : 'DOES NOT EXIST'}, status = 404)
 
-            print('==================================')
-            print(Post.objects.get(id = post_id).user)
-            print('==================================')
-
             if Post.objects.get(id = post_id).user == request.user:
                 return JsonResponse({'message' : 'UNAUTHORIZED USER'}, status = 400)
 
             post = Post.objects.filter(id = post_id, user = request.user)
-            post.update(content = data['content'])
+            post.content = data['content']
 
             return JsonResponse({'message' : 'UPDATED SUCCESSFULLY'}, status = 200)
 
@@ -89,17 +85,18 @@ class PostView(View):
         return JsonResponse({'message' : 'POST DELETED'}, status = 200)
 
 
-class PostlistView(View):
+class PostListView(View):
     def get(self, request):
-        limit = int(request.GET.get("limit", 5))
+        limit = int(request.GET.get("limit", 3))
         offset = int(request.GET.get("offset", 0))
         posts = Post.objects.all()
 
         data = [{
-            "username": post.user.username,
             "title": post.title,
+            "author": post.user.username,
             "content": post.content,
-            "created_at": post.created_at
+            "created_at": post.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            "updated_at": post.updated_at.strftime('%Y-%m-%d %H:%M:%S')
         } for post in posts]
 
         data = data[offset:offset + limit]
